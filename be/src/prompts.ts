@@ -284,7 +284,13 @@ export const CONTINUE_PROMPT = stripIndents`
 `;
 
 
-export const firstprompt = "For all designs I ask you to make, have them be beautiful, not cookie cutter. Make webpages that are fully featured and worthy for production.\n\nBy default, this template supports JSX syntax with Tailwind CSS classes, React hooks, and Lucide React for icons. Do not install other packages for UI themes, icons, etc unless absolutely necessary or I request them.\n\nUse icons from lucide-react for logos.\n"
+export const firstNodeprompt = `For all backend code you create, make it clean, modular, and production-ready.  
+Follow Node.js and Express best practices: use controllers for logic, routes for endpoints, and middlewares for cross-cutting concerns.  
+Handle errors gracefully, validate inputs, and use async/await for asynchronous operations.  
+Write readable, maintainable code that can scale in real-world environments.  
+Avoid installing unnecessary dependencies unless explicitly requested.  
+Your goal is to build reliable, well-structured APIs and backend logic that follow industry standards.
+`
 
 export const nodePrompt = `You are working inside a Node.js + Express + TypeScript backend project.  
 The project includes typical files and directories such as:  
@@ -306,6 +312,13 @@ Do not delete or rename existing files unless explicitly instructed.
 Ensure imports are correct and relative.  
 Keep the codebase organized, type-safe, and production-ready.`
 
+
+export const firstReactprompt = `For all interfaces or components you create, make them visually beautiful, functional, and production-ready.  
+Build modern, responsive UIs that feel professional and thoughtfully designed.  
+Use Tailwind CSS for layout and styling, React hooks for logic, and Lucide React for icons.  
+Do not install other UI or icon libraries unless explicitly requested.  
+Follow best practices for accessibility, spacing, typography, and component structure.  
+Your goal is to produce designs that look clean, elegant, and cohesive across the entire app.`
 
 export const reactPrompt = `You are working inside a Vite + React + TypeScript project that uses Tailwind CSS and Lucide React for icons.  
 The project already includes configuration and boilerplate files such as:  
