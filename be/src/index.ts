@@ -1,15 +1,22 @@
 import 'dotenv/config'
-import express from 'express';
+import express, { json } from 'express';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import {  firstNodeprompt, firstReactprompt, getSystemPrompt, nodePrompt, reactPrompt } from './prompts.js';
-
+import cors from 'cors'
 const app = express()
 const router = express.Router()
+app.use(cors())
 app.use(express.json())
 app.use("/",router)
 
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const message = "make a todo app ";
+
+
 router.post('/template',async(req,res)=>{
-  const Text = req.body
+  console.log("got request")
+  const {Text} = req.body
   const message = JSON.stringify(Text)
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
@@ -22,7 +29,10 @@ router.post('/template',async(req,res)=>{
       
     ],
   });
+  console.log("connection")
  const response=  await chat.sendMessage("based on what user send tell what does it want in a single word it can be react or node.do not return anything extra")
+ console.log("got response")
+ console.log(response)
     if(response.response.text()=="react"){
       res.json({prompt:reactPrompt,beautyPrompt:firstReactprompt})
     }else if(response.response.text()=="Node"){
@@ -31,7 +41,7 @@ res.json({prompt:nodePrompt,beauyPrompt:firstNodeprompt})
 })
 
 router.post('/chat',async(req,res)=>{
-  const {beautyPrompt,prompt} = req.body
+  const {beautyPrompt,prompt,userPrompt} = req.body
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const chat = model.startChat({
@@ -48,11 +58,11 @@ router.post('/chat',async(req,res)=>{
     ],
   });
    
-   const response = await chat.sendMessage(message)
-   const t = await chat.getHistory()
-   for(let i =0;i<t.length;i++){
-         console.log(t[i]?.parts)
-       }
+   const response = await chat.sendMessage(userPrompt)
+  //  const t = await chat.getHistory()
+  //  for(let i =0;i<t.length;i++){
+  //        console.log(t[i]?.parts)
+  //      }
    
  console.log(response.response.text())
  res.json({})
@@ -60,8 +70,7 @@ router.post('/chat',async(req,res)=>{
 
 
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const message = "make a todo app ";
+
 async function main() {
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
@@ -87,7 +96,7 @@ async function main() {
     },
   ];
 
-  // Pass the array directly
+ 
   const stream = await model.generateContentStream(JSON.stringify(chat));
      for await (const chunk of stream.stream) {
     const text = chunk.text();
