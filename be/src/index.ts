@@ -11,7 +11,7 @@ app.use("/",router)
 
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const message = "make a todo app ";
+
 
 
 router.post('/template',async(req,res)=>{
@@ -32,20 +32,27 @@ router.post('/template',async(req,res)=>{
   console.log("connection")
  const response=  await chat.sendMessage("based on what user send tell what does it want in a single word it can be react or node.do not return anything extra")
  console.log("got response")
- console.log(response)
+
     if(response.response.text()=="react"){
       res.json({prompt:reactPrompt,beautyPrompt:firstReactprompt})
-    }else if(response.response.text()=="Node"){
+    }else if(response.response.text()=="node"){
 res.json({prompt:nodePrompt,beauyPrompt:firstNodeprompt})
+    } else {
+      res.json({msg:"could not understand"})
     }
 })
 
 router.post('/chat',async(req,res)=>{
   const {beautyPrompt,prompt,userPrompt} = req.body
+  const UserPrompt = JSON.stringify(userPrompt)
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const chat = model.startChat({
     history: [
+      {
+        role: "user",
+        parts: [{ text: getSystemPrompt() }],
+      },
       {
         role: "user",
         parts: [{ text: beautyPrompt }],
@@ -58,14 +65,14 @@ router.post('/chat',async(req,res)=>{
     ],
   });
    
-   const response = await chat.sendMessage(userPrompt)
+   const response = await chat.sendMessage(UserPrompt)
   //  const t = await chat.getHistory()
   //  for(let i =0;i<t.length;i++){
   //        console.log(t[i]?.parts)
   //      }
    
- console.log(response.response.text())
- res.json({})
+ 
+ res.json({AiRes:response.response.text()})
 })
 
 

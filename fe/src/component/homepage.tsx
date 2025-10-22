@@ -21,14 +21,15 @@ async function sendPrompt(){
   const prompt = response.data.prompt
   const beautyPrompt = response.data.beautyPrompt 
   console.log(beautyPrompt,prompt)
-  console.log("got prpmpt")
+  console.log("got prompt")
 
-  await axios.post("http://localhost:4000/chat",{
+  const ressp = await axios.post("http://localhost:4000/chat",{
     prompt,
     beautyPrompt,
     userPrompt: textvalue
   })
-  console.log("sent prompt")  
+  console.log(ressp.data.AiRes)
+  
   redirect("/project")
 }
 
