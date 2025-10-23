@@ -30,13 +30,13 @@ router.post('/template',async(req,res)=>{
     ],
   });
   console.log("connection")
- const response=  await chat.sendMessage("based on what user send tell what does it want in a single word it can be react or node.do not return anything extra")
+ const response =  await chat.sendMessage("based on what user send. tell what does it want in a single word it can be react or node.do not return anything extra")
  console.log("got response")
 
-    if(response.response.text()=="react"){
+    if(response.response.text()=="react" || response.response.text()=="React"){
       res.json({prompt:reactPrompt,beautyPrompt:firstReactprompt})
-    }else if(response.response.text()=="node"){
-res.json({prompt:nodePrompt,beauyPrompt:firstNodeprompt})
+    }else if(response.response.text()=="node" || response.response.text()=="Node"){
+res.json({prompt:nodePrompt,beautyPrompt:firstNodeprompt})
     } else {
       res.json({msg:"could not understand"})
     }

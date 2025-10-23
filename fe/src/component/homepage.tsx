@@ -1,9 +1,10 @@
 import axios from "axios";
 import  {ChevronsRight, PlusIcon} from "lucide-react"
 import { useState } from "react";
-import { redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
+  const redirect = useNavigate();
 
   const [textvalue, setTextValue] = useState("")
 
@@ -19,16 +20,14 @@ async function sendPrompt(){
   })
 
   const prompt = response.data.prompt
-  const beautyPrompt = response.data.beautyPrompt 
-  console.log(beautyPrompt,prompt)
+  const beautyPrompt = response.data.beautyPrompt
+  console.log(beautyPrompt, prompt)
   console.log("got prompt")
 
-  const ressp = await axios.post("http://localhost:4000/chat",{
-    prompt,
-    beautyPrompt,
-    userPrompt: textvalue
-  })
-  console.log(ressp.data.AiRes)
+  localStorage.setItem("prompt",prompt)
+  localStorage.setItem("beautyPrompt",beautyPrompt)
+  localStorage.setItem("userPrompt",textvalue)
+
   
   redirect("/project")
 }
