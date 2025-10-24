@@ -24,10 +24,11 @@ export default function Source(){
        })
 
     },[textvalue])
+    console.log("data",data)
 
     return <div className="w-screen flex h-screen bg-black text-white">
         <div>
-            <pre> {data} </pre>
+             {data}
         </div>
           <Steps/> 
     </div>

@@ -33,8 +33,8 @@ async function sendPrompt(){
 }
 
   return (
-    <div className="bg-fuchsia-200 h-screen w-screen flex items-center justify-center">
-     <div className="p-4 bg-fuchsia-200 text-black text-xl fixed  top-0 left-0 font-serif ">
+    <div className="bg-black h-screen w-screen bg-gradient-to-b from-purple-500 via-indigo-500 to-blue-500  flex items-center justify-center">
+     <div className="p-4 bg-purple-500 text-fuchsia-200 text-xl fixed  top-0 left-0 font-serif ">
       <p>Bolt.new</p>
      </div>
       
