@@ -10,11 +10,12 @@ const fetchData = async () => {
                 beautyPrompt,
                 userPrompt: textvalue
             })
+    
             return ressp.data.AiRes
         }
 
 
-export default function Source(){
+export  default function Source(){
     const [data, setData] = useState("")
     
     useEffect(()=>{
@@ -24,10 +25,11 @@ export default function Source(){
        })
 
     },[textvalue])
+    
     console.log("data",data)
 
     return <div className="w-screen flex h-screen bg-black text-white">
-        <div>
+        <div className="w-screen h-screen text-yellow-500">
              {data}
         </div>
           <Steps/> 

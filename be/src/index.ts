@@ -70,8 +70,8 @@ router.post('/chat',async(req,res)=>{
   //  for(let i =0;i<t.length;i++){
   //        console.log(t[i]?.parts)
   //      }
-   
- 
+
+
  res.json({AiRes:response.response.text()})
 })
 
