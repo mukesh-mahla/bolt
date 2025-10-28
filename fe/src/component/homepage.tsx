@@ -34,9 +34,9 @@ async function sendPrompt(){
 
   return (
     <div className="bg-black h-screen w-screen bg-gradient-to-b from-purple-500 via-indigo-500 to-blue-500  flex items-center justify-center">
-     <div className="p-4 bg-purple-500 text-fuchsia-200 text-xl fixed  top-0 left-0 font-serif ">
+     <div className="p-4 bg-purple-500 text-black text-xl fixed  top-0 left-0 font-serif ">
       <p>Bolt.new</p>
-     </div>
+     </div> 
       
       <div className="relative w-full gap-0 max-w-md">
         <div className="text-4xl font-serif mb-10 text-center ">what is in your mind today</div>
