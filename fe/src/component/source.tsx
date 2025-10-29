@@ -30,12 +30,13 @@ export  default function Source(){
       setStep(step)
        
     },[textvalue])
-       
+       console.log("step  ",step)
     console.log("data",data)
 
     return <div className="w-screen flex h-screen bg-black text-white">
         <div className="w-screen h-screen text-yellow-500">
-            {step.map(x => <p>`${x}`</p>)}
+            
+            {step.map(x => <p>{`${x.title}`}{`${x.status}`}</p>)}
         </div>
          
     </div>
