@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
-
+console.log("source file loaded")
 import { parseStepsFromResponse } from "../parser"
 import type { Step } from "../types/type"
 const prompt = localStorage.getItem("prompt") || "" 
@@ -22,13 +22,15 @@ export  default function Source(){
     const [step,setStep] = useState<Step[]>([])
 
     useEffect(()=>{
+        
 
        fetchData().then(res => {
-           setData(res)
+            setData(res)
+            const parsedStep:Step[] =  parseStepsFromResponse(res)
+            setStep(parsedStep)
        })
-      const step:Step[] =  parseStepsFromResponse(data)
-      setStep(step)
-       
+      
+
     },[textvalue])
        console.log("step  ",step)
     console.log("data",data)
