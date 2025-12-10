@@ -2,7 +2,8 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 console.log("source file loaded")
 import { parseStepsFromResponse } from "../parser"
-import type { Step } from "../types/type"
+import {  type Step } from "../types/type"
+
 const prompt = localStorage.getItem("prompt") || "" 
 const beautyPrompt = localStorage.getItem("beautyPrompt") || ""
 const textvalue = localStorage.getItem("userPrompt") || ""  
@@ -20,6 +21,7 @@ const fetchData = async () => {
 export  default function Source(){
     const [data, setData] = useState("")
     const [step,setStep] = useState<Step[]>([])
+    // const [File,setFIle] = useState<FileItem[]>([])
 
     useEffect(()=>{
         
@@ -38,14 +40,15 @@ export  default function Source(){
     return <div className="w-screen flex h-screen bg-black text-white">
         <div className="w-screen h-screen text-yellow-500">
             
-            {step.map(x => <p>{`${x.title}`}{`${x.status}`}</p>)}
+            {step.map(x => <p>{`${x.title}`}{` ${x.status}`}</p>)}
+            
         </div>
          
     </div>
 }
 
-function Steps(){
-    return <div className="w-screen flex h-screen bg-black text-white">
-        Steps Component 
+function Steps({step}:{step:Step[]}){
+    return <div className="w-screen flex h-screen bg-black text-green">
+        Steps Component {step.map(x => <div> ${x.code}</div>)}
     </div>
 }
