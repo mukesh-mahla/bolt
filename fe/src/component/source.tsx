@@ -35,20 +35,21 @@ export  default function Source(){
 
     },[textvalue])
        console.log("step  ",step)
-    console.log("data",data)
+       console.log("data",data)
+       console.log("component renderd")
 
     return <div className="w-screen flex h-screen bg-black text-white">
         <div className="w-screen h-screen text-yellow-500">
             
-            {step.map(x => <p>{`${x.title}`}{` ${x.status}`}</p>)}
+            {step.map(x => <p>{`${x.title}`}{` ${x.status}`} {x.path} {x.title} {x.type}</p>)}
             
         </div>
          
     </div>
 }
 
-function Steps({step}:{step:Step[]}){
-    return <div className="w-screen flex h-screen bg-black text-green">
-        Steps Component {step.map(x => <div> ${x.code}</div>)}
-    </div>
-}
+// function Steps({step}:{step:Step[]}){
+//     return <div className="w-screen flex h-screen bg-black text-green">
+//         Steps Component {step.map(x => <div> ${x.code}</div>)}
+//     </div>
+// }

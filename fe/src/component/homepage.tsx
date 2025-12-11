@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
   const redirect = useNavigate();
+  console.log("send template")
 
   const [textvalue, setTextValue] = useState("")
 
