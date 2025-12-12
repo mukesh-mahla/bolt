@@ -3,6 +3,8 @@ import axios from "axios"
 console.log("source file loaded")
 import { parseStepsFromResponse } from "../parser"
 import {  type Step } from "../types/type"
+import { StepsList } from "../componets/steplist"
+
 
 const prompt = localStorage.getItem("prompt") || "" 
 const beautyPrompt = localStorage.getItem("beautyPrompt") || ""
@@ -19,29 +21,36 @@ const fetchData = async () => {
         }
 
 export  default function Source(){
-    const [data, setData] = useState("")
+    // const [data, setData] = useState("")
     const [step,setStep] = useState<Step[]>([])
+    const [currentStep, setCurrentStep] = useState<number>(-1);
+
     // const [File,setFIle] = useState<FileItem[]>([])
 
     useEffect(()=>{
         
 
        fetchData().then(res => {
-            setData(res)
+            // setData(res)
             const parsedStep:Step[] =  parseStepsFromResponse(res)
             setStep(parsedStep)
+
+           if (parsedStep.length > 0) setCurrentStep(parsedStep[0].id);
        })
       
 
-    },[textvalue])
-       console.log("step  ",step)
-       console.log("data",data)
-       console.log("component renderd")
+    },[])
+       
+    function handleStepClick(stepId: number) {
+    setCurrentStep(stepId);
+    // TODO: when step clicked, you can also open the file, scroll to code, or populate editor
+    console.log("clicked step", stepId);
+  }
 
     return <div className="w-screen flex h-screen bg-black text-white">
         <div className="w-screen h-screen text-yellow-500">
             
-            {step.map(x => <p>{`${x.title}`}{` ${x.status}`} {x.path} {x.title} {x.type}</p>)}
+            <StepsList steps={step} currentStep={currentStep} onStepClick={handleStepClick}/>
             
         </div>
          

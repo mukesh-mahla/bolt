@@ -21,6 +21,7 @@ export interface Project {
   steps: Step[];
 }
 
+
 export interface FileItem {
   name: string;
   type: 'file' | 'folder';
