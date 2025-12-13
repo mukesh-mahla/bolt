@@ -5,6 +5,7 @@ import { parseStepsFromResponse } from "../parser"
 import {  StepType, type FileItem, type Step } from "../types/type"
 import { StepsList } from "../componets/steplist"
 import { CodeEditor } from "../componets/codeEditor"
+import { FileExplorer } from "../componets/fileExplorer"
 
 
 const prompt = localStorage.getItem("prompt") || "" 
@@ -26,6 +27,7 @@ export  default function Source(){
     const [step,setStep] = useState<Step[]>([])
     const [currentStep, setCurrentStep] = useState<number>(-1);
       const [files, setFiles] = useState<FileItem[]>([]);
+      const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
 
     // const [File,setFIle] = useState<FileItem[]>([])
 
@@ -107,36 +109,61 @@ export  default function Source(){
     setCurrentStep(stepId);
     
     console.log("clicked step", stepId);
-  }
+  } 
 
-    return <div className="w-screen flex h-screen bg-black text-white">
-        <div className="w-screen h-screen text-yellow-500">
-            
-            <StepsList steps={step} currentStep={currentStep} onStepClick={handleStepClick}/>
-            <CodeEditor file={files}/>
+
+    return  (
+  <div className="w-screen h-screen bg-[#0f0f12] text-zinc-200 flex flex-col">
+
+    {/* Top Bar */}
+    <header className="h-11 flex items-center justify-between px-4 border-b border-zinc-800 bg-[#121216]">
+      <span className="text-sm text-zinc-400">
+        bolt.new / workspace
+      </span>
+
+      <span className="text-xs text-zinc-500 truncate max-w-[50%]">
+        {selectedFile?.path ?? "No file selected"}
+      </span>
+    </header>
+
+    {/* Main Area */}
+    <div className="flex flex-1 overflow-hidden no-scrollbar">
+
+      {/* Steps */}
+      <aside className="w-[260px] bg-[#111114] border-r border-zinc-800 overflow-auto no-scrollbar">
+        <div className="px-3 py-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
+          Steps
         </div>
-         
+        <StepsList
+          steps={step}
+          currentStep={currentStep}
+          onStepClick={handleStepClick}
+        />
+      </aside>
+
+      {/* File Explorer */}
+      <aside className="w-[240px] bg-[#111114] border-r border-zinc-800 overflow-auto no-scrollbar">
+        <div className="px-3 py-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
+          Files
+        </div>
+        <FileExplorer
+          files={files}
+          onFileSelect={setSelectedFile}
+        />
+      </aside>
+
+      {/* Editor */}
+      <main className="flex-1 bg-[#0f0f12] p-4 overflow-hidden no-scrollbar">
+        <div className="h-full rounded-xl bg-[#151518] border border-zinc-800 shadow-inner">
+          <CodeEditor file={selectedFile} />
+        </div>
+      </main>
+
     </div>
+  </div>
+);
+
+
 }
 
 
-
-
-
-
-
-
-
-
-  
-// function genratedFile(step:Step[]):FileItem[]{
-// const File:FileItem[] = [];
-//     if(step.find(x=>x.type == StepType.CreateFile)){
-//         File.push({
-//             path:step.path.split('/     ')
-//         })
-//     }
-  
-
-//     return  File
-// } 
