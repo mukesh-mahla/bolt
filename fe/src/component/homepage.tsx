@@ -1,21 +1,17 @@
 import axios from "axios";
 import  {ChevronsRight, PlusIcon} from "lucide-react"
-import { useState } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
+  console.log("re render hapeen because of text")
   const redirect = useNavigate();
   console.log("send template")
-
-  const [textvalue, setTextValue] = useState("")
-
-function handelchange(e:any){
-  setTextValue(e.target.value)
+     const textref = useRef<HTMLTextAreaElement>("" as any);
   
-}
-
 async function sendPrompt(){
-
+console.log("send prompt clicked")
+const textvalue = textref.current?.value ?? "";
  const response = await axios.post("http://localhost:4000/template",{
     Text: textvalue
   })
@@ -42,9 +38,8 @@ async function sendPrompt(){
       <div className="relative w-full gap-0 max-w-md">
         <div className="text-4xl font-serif mb-10 text-center ">what is in your mind today</div>
         <textarea
-        value={textvalue}
-        onChange={handelchange}
-          placeholder="Type something..."
+        ref={textref}
+        placeholder="Type something..."
           className="p-4  w-full border border-fuchsia-300 resize-none  h-30  rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-400 bg-white"
         />
         <div className="bg-white border-none flex items-center justify-between rounded-xl p-2 text-right text-xl"><PlusIcon className="inline"/><button className="cursor-pointer p-2 rounded-md" onClick={sendPrompt}>Build Now <ChevronsRight className="inline-block" /></button></div>
