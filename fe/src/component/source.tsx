@@ -29,7 +29,7 @@ export  default function Source(){
       const [files, setFiles] = useState<FileItem[]>([]);
       const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
 
-    // const [File,setFIle] = useState<FileItem[]>([])
+    
 
     useEffect(()=>{
        fetchData().then(res => {
@@ -48,7 +48,7 @@ export  default function Source(){
       updateHappened = true;
       if (step?.type === StepType.CreateFile) {
         let parsedPath = step.path?.split("/") ?? []; // ["src", "components", "App.tsx"]
-        let currentFileStructure = [...originalFiles]; // {}
+        let currentFileStructure = [...originalFiles]; 
         let finalAnswerRef = currentFileStructure;
   
         let currentFolder = ""
@@ -127,9 +127,9 @@ export  default function Source(){
     </header>
 
     {/* Main Area */}
-    <div className="flex flex-1 overflow-hidden no-scrollbar">
+    <div className="flex flex-1 overflow-hidden ">
 
-      {/* Steps */}
+      
       <aside className="w-[260px] bg-[#111114] border-r border-zinc-800 overflow-auto no-scrollbar">
         <div className="px-3 py-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
           Steps
@@ -141,7 +141,7 @@ export  default function Source(){
         />
       </aside>
 
-      {/* File Explorer */}
+      
       <aside className="w-[240px] bg-[#111114] border-r border-zinc-800 overflow-auto no-scrollbar">
         <div className="px-3 py-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
           Files
@@ -152,7 +152,7 @@ export  default function Source(){
         />
       </aside>
 
-      {/* Editor */}
+      
       <main className="flex-1 bg-[#0f0f12] p-4 overflow-hidden no-scrollbar">
         <div className="h-full rounded-xl bg-[#151518] border border-zinc-800 shadow-inner">
           <CodeEditor file={selectedFile} />
