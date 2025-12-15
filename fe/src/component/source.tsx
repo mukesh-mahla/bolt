@@ -18,6 +18,7 @@ const fetchData = async () => {
                 beautyPrompt,
                 userPrompt: textvalue
             })
+            console.log(ressp.data.AiRes)
     
             return ressp.data.AiRes
         }

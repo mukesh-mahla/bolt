@@ -1,140 +1,105 @@
-import 'dotenv/config'
-import express, { json } from 'express';
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import {  firstNodeprompt, firstReactprompt, getSystemPrompt, nodePrompt, reactPrompt } from './prompts.js';
-import cors from 'cors'
-const app = express()
-const router = express.Router()
-app.use(cors())
-app.use(express.json())
-app.use("/",router)
+import {
+  firstNodeprompt,
+  firstReactprompt,
+  getSystemPrompt,
+  nodePrompt,
+  reactPrompt,
+} from "./prompts.js";
 
+const app = express();
+const router = express.Router();
+
+app.use(cors());
+app.use(express.json());
+app.use("/", router);
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 
+router.post("/template", async (req, res) => {
+  const { Text } = req.body;
+  if (!Text) return res.status(400).json({ error: "Text missing" });
 
-router.post('/template',async(req,res)=>{
-  console.log("got request")
-  const {Text} = req.body
-  const message = JSON.stringify(Text)
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-  const chat = model.startChat({
-    history: [
-      {
-        role: "user",
-        parts: [{ text: message }],
-      },
-      
-    ],
-  });
-  console.log("connection")
- const response =  await chat.sendMessage("based on what user send. tell what does it want in a single word it can be react or node.do not return anything extra")
- console.log("got response")
+  const classifierPrompt = `
+Classify the user's intent.
 
-    if(response.response.text()=="react" || response.response.text()=="React"){
-      res.json({prompt:reactPrompt,beautyPrompt:firstReactprompt})
-    }else if(response.response.text()=="node" || response.response.text()=="Node"){
-res.json({prompt:nodePrompt,beautyPrompt:firstNodeprompt})
-    } else {
-      res.json({msg:"could not understand"})
-    }
-})
+Return ONLY ONE WORD:
+- react → frontend, UI, components, pages, calculator, todo, website
+- node → backend, api, server, database, auth, express
 
-router.post('/chat',async(req,res)=>{
-  const {beautyPrompt,prompt,userPrompt} = req.body
-  const UserPrompt = JSON.stringify(userPrompt)
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+If the request is ambiguous, ALWAYS return react.
 
-  const chat = model.startChat({
-    history: [
-      {
-        role: "user",
-        parts: [{ text: getSystemPrompt() }],
-      },
-      {
-        role: "user",
-        parts: [{ text: beautyPrompt }],
-      },
-      {
-        role:"user",
-        parts:[{text:prompt}]
-      }
-      
-    ],
-  });
-   
-   const response = await chat.sendMessage(UserPrompt)
-  //  const t = await chat.getHistory()
-  //  for(let i =0;i<t.length;i++){
-  //        console.log(t[i]?.parts)
-  //      }
+User request:
+${Text}
+`;
+
+  const result = await model.generateContent(classifierPrompt);
+  const intent = result.response.text().toLowerCase().trim();
+
+  console.log("INTENT:", intent);
 
 
- res.json({AiRes:response.response.text()})
-})
-
-
-
-
-async function main() {
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-  const chat =  [
-     {
-     
-      alias: "system",
-      content: [
-        { type: "text", text: getSystemPrompt },
-      ],
-    },
-    {
-      alias: "user",
-      content: [
-        { type: "text", text: reactPrompt },
-      ],
-    },
-    {
-      alias: "user",
-      content: [
-        { type: "text", text: "hello" },
-      ],
-    },
-  ];
-
- 
-  const stream = await model.generateContentStream(JSON.stringify(chat));
-     for await (const chunk of stream.stream) {
-    const text = chunk.text();
-    if (text) process.stdout.write(text);
+  if (intent.includes("node") || intent.includes("backend") || intent.includes("express")) {
+    return res.json({
+      prompt: nodePrompt,
+      beautyPrompt: firstNodeprompt,
+      type: "backend",
+    });
   }
-  
-}
+
+  return res.json({
+    prompt: reactPrompt,
+    beautyPrompt: firstReactprompt,
+    type: "frontend",
+  });
+});
 
 
-// async function test(){
-//   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+router.post("/chat", async (req, res) => {
+  const { beautyPrompt, prompt, userPrompt } = req.body;
+  if (!userPrompt) {
+    return res.status(400).json({ error: "userPrompt missing" });
+  }
 
-//   const chat = model.startChat({
-//     history: [
-//       {
-//         role: "user",
-//         parts: [{ text: "hello" }],
-//       },
-      
-//     ],
-//   });
-//  const response=  await chat.sendMessage("hi")
-//  const t = await chat.getHistory()
-//    for(let i =0;i<t.length;i++){
-//     console.log(t[i]?.parts)
-//    }
- 
-// }
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+  });
+
+  // ✅ Gemini requires FIRST message to be "user"
+  const chat = model.startChat({
+    history: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: `
+${getSystemPrompt()}
+
+${beautyPrompt}
+
+${prompt}
+            `,
+          },
+        ],
+      },
+    ],
+  });
+
+  const response = await chat.sendMessage(userPrompt);
+
+  res.json({
+    AiRes: response.response.text(),
+  });
+});
 
 
-// test()
 
-app.listen(4000,()=>{console.log("server is runnin on 4000")})
-
+app.listen(4000, () => {
+  console.log("Server running on http://localhost:4000");
+});

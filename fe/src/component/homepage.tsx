@@ -1,51 +1,93 @@
 import axios from "axios";
-import  {ChevronsRight, PlusIcon} from "lucide-react"
-import { useRef } from "react";
+import { ChevronsRight,  Loader2 } from "lucide-react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
-  console.log("re render hapeen because of text")
   const redirect = useNavigate();
-  console.log("send template")
-     const textref = useRef<HTMLTextAreaElement>("" as any);
-  
-async function sendPrompt(){
-console.log("send prompt clicked")
-const textvalue = textref.current?.value ?? "";
- const response = await axios.post("http://localhost:4000/template",{
-    Text: textvalue
-  })
+  const textRef = useRef<HTMLTextAreaElement | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const prompt = response.data.prompt
-  const beautyPrompt = response.data.beautyPrompt
-  console.log(beautyPrompt, prompt)
-  console.log("got prompt")
+  async function sendPrompt() {
+    if (loading) return;
 
-  localStorage.setItem("prompt",prompt)
-  localStorage.setItem("beautyPrompt",beautyPrompt)
-  localStorage.setItem("userPrompt",textvalue)
+    const textvalue = textRef.current?.value?.trim() ?? "";
+    if (!textvalue) return;
 
-  
-  redirect("/project")
-}
+    try {
+      setLoading(true);
+
+      const response = await axios.post("http://localhost:4000/template", {
+        Text: textvalue,
+      });
+
+      const { prompt, beautyPrompt } = response.data;
+
+      localStorage.setItem("prompt", prompt);
+      localStorage.setItem("beautyPrompt", beautyPrompt);
+      localStorage.setItem("userPrompt", textvalue);
+
+      redirect("/project");
+    } catch (err) {
+      console.error("Template error:", err);
+      setLoading(false);
+    }
+  }
 
   return (
-    <div className="bg-black h-screen w-screen bg-gradient-to-b from-purple-500 via-indigo-500 to-blue-500  flex items-center justify-center">
-     <div className="p-4 bg-purple-500 text-black text-xl fixed  top-0 left-0 font-serif ">
-      <p>Bolt.new</p>
-     </div> 
+    <div className="h-screen w-screen bg-gradient-to-b from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center">
       
-      <div className="relative w-full gap-0 max-w-md">
-        <div className="text-4xl font-serif mb-10 text-center ">what is in your mind today</div>
+      {/* Logo */}
+      <div className="absolute top-4 left-4 px-4 py-2 bg-white/90 rounded-lg text-black font-serif shadow">
+        Bolt.new
+      </div>
+
+      {/* Card */}
+      <div className="w-full max-w-md bg-white/95 rounded-2xl shadow-xl p-6">
+        
+        <h1 className="text-3xl font-serif text-center mb-6 text-gray-900">
+          What’s in your mind today?
+        </h1>
+
         <textarea
-        ref={textref}
-        placeholder="Type something..."
-          className="p-4  w-full border border-fuchsia-300 resize-none  h-30  rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-400 bg-white"
+          ref={textRef}
+          placeholder="Build a calculator app, todo app, landing page..."
+          className="w-full h-28 p-4 rounded-xl border border-gray-300 resize-none
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500
+                     text-gray-900 placeholder-gray-400"
+          disabled={loading}
         />
-        <div className="bg-white border-none flex items-center justify-between rounded-xl p-2 text-right text-xl"><PlusIcon className="inline"/><button className="cursor-pointer p-2 rounded-md" onClick={sendPrompt}>Build Now <ChevronsRight className="inline-block" /></button></div>
+
+        <button
+          onClick={sendPrompt}
+          disabled={loading}
+          className={`
+            mt-4 w-full flex items-center justify-center gap-2
+            px-4 py-3 rounded-xl font-medium text-white
+            transition-all duration-200
+            ${loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98]"}
+          `}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Building...
+            </>
+          ) : (
+            <>
+              
+              Build Now
+              <ChevronsRight className="w-4 h-4" />
+            </>
+          )}
+        </button>
+
+        <p className="mt-3 text-xs text-gray-500 text-center">
+          Describe what you want to build. Frontend by default.
+        </p>
       </div>
     </div>
   );
 }
-
-

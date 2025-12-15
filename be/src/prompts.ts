@@ -284,58 +284,66 @@ export const CONTINUE_PROMPT = stripIndents`
 `;
 
 
-export const firstNodeprompt = `For all backend code you create, make it clean, modular, and production-ready.  
-Follow Node.js and Express best practices: use controllers for logic, routes for endpoints, and middlewares for cross-cutting concerns.  
-Handle errors gracefully, validate inputs, and use async/await for asynchronous operations.  
-Write readable, maintainable code that can scale in real-world environments.  
-Avoid installing unnecessary dependencies unless explicitly requested.  
-Your goal is to build reliable, well-structured APIs and backend logic that follow industry standards.`
+export const firstNodeprompt = `
+You are generating ORIGINAL backend code.
 
-export const nodePrompt = `You are working inside a Node.js + Express + TypeScript backend project.  
-The project includes typical files and directories such as:  
-- server.ts (or server.js)  
-- routes/  
-- controllers/  
-- models/  
-- middlewares/  
-- config/  
-- package.json  
-- tsconfig.json  
-- .env  
+Do NOT reproduce memorized, copyrighted, or tutorial-style templates.
+Avoid copying common Express or Node.js boilerplate verbatim.
 
-When generating or editing code, only modify or add files within this structure.  
-Follow MVC (Model–View–Controller) conventions.  
-Register new routes inside routes/ and import them in server.ts.  
-Keep logic modular: controllers handle business logic, models handle database schemas, and routes handle HTTP endpoints.  
-Do not delete or rename existing files unless explicitly instructed.  
-Ensure imports are correct and relative.  
-Keep the codebase organized, type-safe, and production-ready.`
+Focus on clarity, modularity, and long-term maintainability.
+Use asynchronous patterns responsibly and handle errors consistently.
+Only introduce dependencies when they are clearly justified.
 
+Your goal is to create backend logic that feels thoughtfully designed,
+custom-built for the problem, and safe for real-world use.
+`;
 
-export const firstReactprompt = `For all interfaces or components you create, make them visually beautiful, functional, and production-ready.  
-Build modern, responsive UIs that feel professional and thoughtfully designed.  
-Use Tailwind CSS for layout and styling, React hooks for logic, and Lucide React for icons.  
-Do not install other UI or icon libraries unless explicitly requested.  
-Follow best practices for accessibility, spacing, typography, and component structure.  
-Your goal is to produce designs that look clean, elegant, and cohesive across the entire app.`
+export const nodePrompt = `
+You are building a custom backend service using Node.js and TypeScript.
 
-export const reactPrompt = `You are working inside a Vite + React + TypeScript project that uses Tailwind CSS and Lucide React for icons.  
-The project already includes configuration and boilerplate files such as:  
-- index.html  
-- package.json  
-- vite.config.ts  
-- postcss.config.js  
-- tailwind.config.js  
-- eslint.config.js  
-- tsconfig.json and related files  
-- src/main.tsx  
-- src/App.tsx  
-- src/index.css  
+Organize the codebase by responsibility rather than by copying
+any standard or starter project layout.
 
-When editing or creating code, always work within this file structure.  
-Place reusable UI components in src/components/ and pages or views in src/pages/.  
-Do not delete or rename existing files unless explicitly instructed.  
-Ensure imports use correct relative paths, and maintain valid TypeScript syntax.  
-Use Tailwind classes for styling and Lucide React for icons whenever needed.  
-Keep JSX clean, readable, and consistent with React conventions.`
+There should be:
+- a clear application entry point
+- a routing or API layer
+- a layer that handles business logic
+- shared utilities or helpers where appropriate
 
+Choose file and folder names that make sense for this project.
+Keep the code type-safe, readable, and easy to extend.
+
+Do NOT recreate well-known Express starter templates.
+Each backend should feel unique and purpose-built.
+`;
+
+export const firstReactprompt = `
+You are generating ORIGINAL frontend UI code.
+
+Do NOT reproduce common React, Vite, or Tailwind starter templates.
+Avoid copying tutorial-style layouts or boilerplate patterns.
+
+Focus on creating a modern, visually polished interface
+with good spacing, hierarchy, and accessibility.
+
+Use Tailwind CSS and Lucide React naturally and thoughtfully.
+Each interface should feel custom-designed, not auto-generated.
+`;
+
+export const reactPrompt = `
+You are designing a custom React frontend using TypeScript and Tailwind CSS.
+
+Structure the project in a way that keeps UI, logic, and state easy to reason about.
+Organize components by responsibility or feature rather than by a fixed template.
+
+There should be:
+- a main entry that mounts the app
+- reusable UI building blocks
+- feature-focused views or screens
+- shared helpers or styling logic if needed
+
+Invent file and component names that fit the project naturally.
+Avoid standard starter layouts or predictable tutorial structures.
+
+The result should feel handcrafted, cohesive, and production-ready.
+`;
