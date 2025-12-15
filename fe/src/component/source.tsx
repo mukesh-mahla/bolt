@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
-console.log("source file loaded")
+
 import { parseStepsFromResponse } from "../parser"
 import {  StepType, type FileItem, type Step } from "../types/type"
 import { StepsList } from "../componets/steplist"
 import { CodeEditor } from "../componets/codeEditor"
 import { FileExplorer } from "../componets/fileExplorer"
+import { useWebcontainer } from "../hooks/useWebcontainer"
+
+import { PreviewFrame } from "../componets/previewFrame"
 
 
 const prompt = localStorage.getItem("prompt") || "" 
@@ -18,7 +21,6 @@ const fetchData = async () => {
                 beautyPrompt,
                 userPrompt: textvalue
             })
-            console.log(ressp.data.AiRes)
     
             return ressp.data.AiRes
         }
@@ -29,6 +31,10 @@ export  default function Source(){
     const [currentStep, setCurrentStep] = useState<number>(-1);
       const [files, setFiles] = useState<FileItem[]>([]);
       const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
+
+      const [activeTab,setActivetab] = useState<"code" | "preview">("code")
+
+      const webContainer = useWebcontainer()
 
     
 
@@ -71,6 +77,8 @@ export  default function Source(){
             } else {
               file.content = step.code;
             }
+                
+
           } else {
             /// in a folder
             let folder = currentFileStructure.find(x => x.path === currentFolder)
@@ -103,13 +111,64 @@ export  default function Source(){
         
       }))
     }
-    console.log(files);
+    
   }, [step, files]);
+
+   
+   useEffect(() => {
+    const createMountStructure = (files: FileItem[]): Record<string, any> => {
+      const mountStructure: Record<string, any> = {};
+  
+      const processFile = (file: FileItem, isRootFolder: boolean) => {  
+        if (file.type === 'folder') {
+          // For folders, create a directory entry
+          mountStructure[file.name] = {
+            directory: file.children ? 
+              Object.fromEntries(
+                file.children.map(child => [child.name, processFile(child, false)])
+              ) 
+              : {}
+          };
+        } else if (file.type === 'file') {
+          if (isRootFolder) {
+            mountStructure[file.name] = {
+              file: {
+                contents: file.content || ''
+              }
+            };
+          } else {
+            // For files, create a file entry with contents
+            return {
+              file: {
+                contents: file.content || ''
+              }
+            };
+          }
+        }
+  
+        return mountStructure[file.name];
+      };
+  
+      // Process each top-level file/folder
+      files.forEach(file => processFile(file, true));
+  
+      return mountStructure;
+    };
+  
+    const mountStructure = createMountStructure(files);
+  
+    // Mount the structure if WebContainer is available
+    console.log(mountStructure);
+    webContainer?.mount(mountStructure);
+  }, [files, webContainer]);
+
+
+
 
     function handleStepClick(stepId: number) {
     setCurrentStep(stepId);
     
-    console.log("clicked step", stepId);
+    
   } 
 
 
@@ -118,14 +177,47 @@ export  default function Source(){
 
     {/* Top Bar */}
     <header className="h-11 flex items-center justify-between px-4 border-b border-zinc-800 bg-[#121216]">
-      <span className="text-sm text-zinc-400">
-        bolt.new / workspace
-      </span>
+  {/* Left */}
+  <span className="text-sm text-zinc-400">
+    bolt.new / workspace
+  </span>
 
-      <span className="text-xs text-zinc-500 truncate max-w-[50%]">
-        {selectedFile?.path ?? "No file selected"}
-      </span>
-    </header>
+  {/* Right */}
+  <div className="flex items-center gap-3">
+    {/* File path */}
+    <span className="text-xs text-zinc-500 truncate max-w-[240px]">
+      {selectedFile?.path ?? "No file selected"}
+    </span>
+
+    {/* Divider */}
+    <div className="h-5 w-px bg-zinc-800" />
+
+    {/* Tabs */}
+    <div className="flex rounded-lg border border-zinc-800 bg-[#0f0f12] p-0.5">
+      <button
+        onClick={() => setActivetab("code")}
+        className={`px-3 py-1 text-xs rounded-md transition-colors
+          ${activeTab === "code"
+            ? "bg-zinc-800 text-white"
+            : "text-zinc-400 hover:text-zinc-200"
+          }`}
+      >
+        Code
+      </button>
+
+      <button
+        onClick={() => setActivetab("preview")}
+        className={`px-3 py-1 text-xs rounded-md transition-colors
+          ${activeTab === "preview"
+            ? "bg-zinc-800 text-white"
+            : "text-zinc-400 hover:text-zinc-200"
+          }`}
+      >
+        Preview
+      </button>
+    </div>
+  </div>
+</header>
 
     {/* Main Area */}
     <div className="flex flex-1 overflow-hidden ">
@@ -156,9 +248,12 @@ export  default function Source(){
       
       <main className="flex-1 bg-[#0f0f12] p-4 overflow-hidden no-scrollbar">
         <div className="h-full rounded-xl bg-[#151518] border border-zinc-800 shadow-inner">
-          <CodeEditor file={selectedFile} />
+          {activeTab === "code" ? (<CodeEditor file={selectedFile} />) : (<PreviewFrame webContainer={webContainer!} files={files} />)}
+         
         </div>
       </main>
+
+
 
     </div>
   </div>
