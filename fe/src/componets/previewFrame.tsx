@@ -15,7 +15,7 @@ export function PreviewFrame({ files, webContainer }: PreviewFrameProps) {
 
     installProcess.output.pipeTo(new WritableStream({
       write(data) {
-        console.log(data);
+        // console.log(data);
       }
     }));
 

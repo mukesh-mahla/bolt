@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import {  useEffect, useRef, useState } from "react"
 import axios from "axios"
 
 import { parseStepsFromResponse } from "../parser"
@@ -9,21 +9,14 @@ import { FileExplorer } from "../componets/fileExplorer"
 import { useWebcontainer } from "../hooks/useWebcontainer"
 
 import { PreviewFrame } from "../componets/previewFrame"
+import { useLocation } from "react-router-dom"
 
 
-const prompt = localStorage.getItem("prompt") || "" 
-const beautyPrompt = localStorage.getItem("beautyPrompt") || ""
-const textvalue = localStorage.getItem("userPrompt") || ""  
+// const prompt = localStorage.getItem("prompt") || "" 
+// const beautyPrompt = localStorage.getItem("beautyPrompt") || ""
+// const textvalue = localStorage.getItem("userPrompt") || ""  
+// console.log("PROMPT:", textvalue)
 
-const fetchData = async () => {
-            const ressp = await axios.post("http://localhost:4000/chat",{
-                prompt,
-                beautyPrompt,
-                userPrompt: textvalue
-            })
-    
-            return ressp.data.AiRes
-        }
 
 export  default function Source(){
     // const [data, setData] = useState("")
@@ -31,18 +24,45 @@ export  default function Source(){
     const [currentStep, setCurrentStep] = useState<number>(-1);
       const [files, setFiles] = useState<FileItem[]>([]);
       const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
+      // const [FollowPrompt, setFollowPrompt] = useState("");
+      const [llmMessages, setLlmMessages] = useState<{role: "user" | "model", content: string;}[]>([]);
+
+      const followRef = useRef<HTMLTextAreaElement | null>(null);
+      const location = useLocation();
 
       const [activeTab,setActivetab] = useState<"code" | "preview">("code")
 
+      const { prompt, beautyPrompt, userPrompt } = location.state as { prompt: string, beautyPrompt: string, userPrompt: string };
+
       const webContainer = useWebcontainer()
+
+
+      
+const fetchData = async () => {
+  const newMessages:{role: "user" | "model", content: string;}[] = [
+
+  { role: "user", content: `${beautyPrompt} ${prompt} ${userPrompt}` }
+];
+
+         setLlmMessages(newMessages);
+            const ressp = await axios.post("http://localhost:4000/chat",{
+               message: newMessages
+            })
+
+    
+
+      setLlmMessages([...newMessages,{role:"model", content: ressp.data.AiRes}])
+            return ressp.data.AiRes
+        }
 
     
 
     useEffect(()=>{
-       fetchData().then(res => {
+        fetchData().then(res => {
             // setData(res)
             const parsedStep:Step[] =  parseStepsFromResponse(res)
             setStep(parsedStep)
+
 
            if (parsedStep.length > 0) setCurrentStep(parsedStep[0].id);
        })
@@ -112,7 +132,7 @@ export  default function Source(){
       }))
     }
     
-  }, [step, files]);
+  }, [step]);
 
    
    useEffect(() => {
@@ -162,14 +182,43 @@ export  default function Source(){
     webContainer?.mount(mountStructure);
   }, [files, webContainer]);
 
-
-
-
     function handleStepClick(stepId: number) {
     setCurrentStep(stepId);
     
-    
   } 
+ async function handelclick(){
+ 
+   const followValue = followRef.current?.value?.trim();
+  if (!followValue) return;
+
+  const MAX_MESSAGES = 10;
+
+  const newMessages:{role:"user" | "model", content: string}[] = [
+    ...llmMessages,
+    { role: "user", content: followValue }
+  ];
+
+  const trimmedMessages:{role:"user" | "model", content: string}[] =
+    newMessages.length > MAX_MESSAGES
+      ? newMessages.slice(-MAX_MESSAGES)
+      : newMessages;
+
+  setLlmMessages(trimmedMessages);
+  followRef.current!.value = "";
+
+  const res = await axios.post("http://localhost:4000/chat", {
+    message: trimmedMessages
+  });
+
+  setLlmMessages(prev => [
+    ...prev,
+    { role: "model", content: res.data.AiRes }
+  ]);
+
+  const parsedStep = parseStepsFromResponse(res.data.AiRes);
+  setStep(parsedStep);
+
+  }
 
 
     return  (
@@ -232,6 +281,18 @@ export  default function Source(){
           currentStep={currentStep}
           onStepClick={handleStepClick}
         />
+        <div className="absolute bottom-0 w-[260px] flex border-none">
+          
+          <textarea
+          ref={followRef}
+            
+            className="w-[220px] bg-[#151518] overflow-hidden focus:outline-none resize-none rounded-md p-4 text-sm"
+            placeholder="Enter followUp prompt..."
+          ></textarea>
+
+          <button onClick={handelclick} className="bg-[#151518] w-[40px] cursor-pointer text-center text-green-400 rounded ">send</button>
+          
+        </div>
       </aside>
 
       

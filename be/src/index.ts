@@ -1,7 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import {
   firstNodeprompt,
   firstReactprompt,
@@ -17,14 +18,14 @@ app.use(cors());
 app.use(express.json());
 app.use("/", router);
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const ai = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY!});
+
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 
 router.post("/template", async (req, res) => {
   const { Text } = req.body;
   if (!Text) return res.status(400).json({ error: "Text missing" });
-
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const classifierPrompt = `
 Classify the user's intent.
@@ -39,8 +40,11 @@ User request:
 ${Text}
 `;
 
-  const result = await model.generateContent(classifierPrompt);
-  const intent = result.response.text().toLowerCase().trim();
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: classifierPrompt,
+  });
+  const intent = response.text!.toLowerCase().trim();
 
   console.log("INTENT:", intent);
 
@@ -62,39 +66,26 @@ ${Text}
 
 
 router.post("/chat", async (req, res) => {
-  const { beautyPrompt, prompt, userPrompt } = req.body;
-  if (!userPrompt) {
-    return res.status(400).json({ error: "userPrompt missing" });
+  const { message } = req.body;
+  if (!message) {
+    return res.status(400).json({ error: "message missing" });
   }
+  const contents = message.map((m :{role: "user" | "model", content: string}) => ({
+    role: m.role, // "user" | "model"
+    parts: [{ text: m.content }],
+  }));
 
-  const model = genAI.getGenerativeModel({
+  const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-  });
-
-  // ✅ Gemini requires FIRST message to be "user"
-  const chat = model.startChat({
-    history: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: `
-${getSystemPrompt()}
-
-${beautyPrompt}
-
-${prompt}
-            `,
-          },
-        ],
-      },
-    ],
-  });
-
-  const response = await chat.sendMessage(userPrompt);
-
+    contents:contents,
+    config:{
+      systemInstruction:`${getSystemPrompt()}`
+    }
+  })
+  //  Gemini requires FIRST message to be "user"
+  
   res.json({
-    AiRes: response.response.text(),
+    AiRes: response.text,
   });
 });
 

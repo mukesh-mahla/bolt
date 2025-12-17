@@ -23,11 +23,11 @@ export default function HomePage() {
 
       const { prompt, beautyPrompt } = response.data;
 
-      localStorage.setItem("prompt", prompt);
-      localStorage.setItem("beautyPrompt", beautyPrompt);
-      localStorage.setItem("userPrompt", textvalue);
+      // localStorage.setItem("prompt", prompt);
+      // localStorage.setItem("beautyPrompt", beautyPrompt);
+      // localStorage.setItem("userPrompt", textvalue);
 
-      redirect("/project");
+      redirect("/project",{state:{"prompt": prompt, "beautyPrompt": beautyPrompt, "userPrompt": textvalue}});
     } catch (err) {
       console.error("Template error:", err);
       setLoading(false);
