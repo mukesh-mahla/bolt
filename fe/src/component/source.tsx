@@ -12,11 +12,6 @@ import { PreviewFrame } from "../componets/previewFrame"
 import { useLocation } from "react-router-dom"
 
 
-// const prompt = localStorage.getItem("prompt") || "" 
-// const beautyPrompt = localStorage.getItem("beautyPrompt") || ""
-// const textvalue = localStorage.getItem("userPrompt") || ""  
-// console.log("PROMPT:", textvalue)
-
 
 export  default function Source(){
     // const [data, setData] = useState("")

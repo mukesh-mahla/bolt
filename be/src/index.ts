@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-// import { GoogleGenerativeAI } from "@google/generative-ai";
+
 import { GoogleGenAI } from "@google/genai";
 import {
   firstNodeprompt,
@@ -20,7 +20,7 @@ app.use("/", router);
 
 const ai = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY!});
 
-// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+
 
 
 router.post("/template", async (req, res) => {
@@ -82,7 +82,7 @@ router.post("/chat", async (req, res) => {
       systemInstruction:`${getSystemPrompt()}`
     }
   })
-  //  Gemini requires FIRST message to be "user"
+  
   
   res.json({
     AiRes: response.text,
