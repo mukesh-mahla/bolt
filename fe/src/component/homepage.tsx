@@ -1,7 +1,10 @@
+
 import axios from "axios";
 import { ChevronsRight,  Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL 
 
 export default function HomePage() {
   const redirect = useNavigate();
@@ -17,7 +20,7 @@ export default function HomePage() {
     try {
       setLoading(true);
 
-      const response = await axios.post("http://localhost:4000/template", {
+      const response = await axios.post(`${BACKEND_URL}/template`, {
         Text: textvalue,
       });
 

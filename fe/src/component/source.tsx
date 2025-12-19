@@ -11,7 +11,7 @@ import { useWebcontainer } from "../hooks/useWebcontainer"
 import { PreviewFrame } from "../componets/previewFrame"
 import { useLocation } from "react-router-dom"
 
-
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL 
 
 export  default function Source(){
     // const [data, setData] = useState("")
@@ -40,7 +40,7 @@ const fetchData = async () => {
 ];
 
          setLlmMessages(newMessages);
-            const ressp = await axios.post("http://localhost:4000/chat",{
+            const ressp = await axios.post(`${BACKEND_URL}/chat`,{
                message: newMessages
             })
 

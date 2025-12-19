@@ -21,8 +21,6 @@ app.use("/", router);
 const ai = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY!});
 
 
-
-
 router.post("/template", async (req, res) => {
   const { Text } = req.body;
   if (!Text) return res.status(400).json({ error: "Text missing" });
@@ -89,8 +87,8 @@ router.post("/chat", async (req, res) => {
   });
 });
 
+const PORT = process.env.PORT 
 
-
-app.listen(4000, () => {
+app.listen(PORT, () => {
   console.log("Server running on http://localhost:4000");
 });

@@ -12,9 +12,11 @@
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/vite": "^4.1.14",
+    "@types/dotenv": "^8.2.3",
     "@types/react-router-dom": "^5.3.3",
     "@webcontainer/api": "^1.6.1",
     "axios": "^1.12.2",
+    "dotenv": "^17.2.3",
     "lucide-react": "^0.545.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
