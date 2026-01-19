@@ -90,5 +90,5 @@ router.post("/chat", async (req, res) => {
 const PORT = process.env.PORT 
 
 app.listen(PORT, () => {
-  console.log("Server running on http://localhost:4000");
+  console.log(`Server running on ${PORT}`);
 });
