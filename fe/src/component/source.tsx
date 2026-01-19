@@ -201,7 +201,7 @@ const fetchData = async () => {
   setLlmMessages(trimmedMessages);
   followRef.current!.value = "";
 
-  const res = await axios.post("http://localhost:4000/chat", {
+  const res = await axios.post(`${BACKEND_URL}/chat`, {
     message: trimmedMessages
   });
 
