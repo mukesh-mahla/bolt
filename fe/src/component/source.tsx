@@ -304,7 +304,15 @@ const fetchData = async () => {
       
       <main className="flex-1 bg-[#0f0f12] p-4 overflow-hidden no-scrollbar">
         <div className="h-full rounded-xl bg-[#151518] border border-zinc-800 shadow-inner">
-          {activeTab === "code" ? (<CodeEditor file={selectedFile} />) : (<PreviewFrame webContainer={webContainer!} files={files} />)}
+{activeTab === "code" ? (
+  <CodeEditor file={selectedFile} />
+) : webContainer ? (
+  <PreviewFrame webContainer={webContainer} files={files} />
+) : (
+  <div className="h-full flex items-center justify-center text-zinc-400">
+    Starting environment…
+  </div>
+)}
          
         </div>
       </main>
