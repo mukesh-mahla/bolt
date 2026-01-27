@@ -9,7 +9,7 @@ import { FileExplorer } from "../componets/fileExplorer"
 import { useWebcontainer } from "../hooks/useWebcontainer"
 
 import { PreviewFrame } from "../componets/previewFrame"
-import { useLocation } from "react-router-dom"
+
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL 
 
@@ -23,15 +23,33 @@ export  default function Source(){
       const [llmMessages, setLlmMessages] = useState<{role: "user" | "model", content: string;}[]>([]);
 
       const followRef = useRef<HTMLTextAreaElement | null>(null);
-      const location = useLocation();
+     
 
       const [activeTab,setActivetab] = useState<"code" | "preview">("code")
 
-      const { prompt, beautyPrompt, userPrompt } = location.state as { prompt: string, beautyPrompt: string, userPrompt: string };
+          let prompt = "";
+          let beautyPrompt = "";
+          let userPrompt = "";
+
+            try {
+              const saved = sessionStorage.getItem("project:init");
+              if (!saved) throw new Error("No project data");
+            
+              ({ prompt, beautyPrompt, userPrompt } = JSON.parse(saved));
+            } catch {
+              return (
+                <div className="h-screen flex items-center justify-center text-zinc-400">
+                  No active project. Go back and create one.
+                </div>
+              );
+            }
+      
 
       const webContainer = useWebcontainer()
 
-
+const isIsolated =
+  typeof window !== "undefined" &&
+  (window as any).crossOriginIsolated === true;
       
 const fetchData = async () => {
   const newMessages:{role: "user" | "model", content: string;}[] = [
@@ -44,23 +62,21 @@ const fetchData = async () => {
                message: newMessages
             })
 
-    
 
       setLlmMessages([...newMessages,{role:"model", content: ressp.data.AiRes}])
             return ressp.data.AiRes
         }
 
     
-
     useEffect(()=>{
+
         fetchData().then(res => {
             // setData(res)
             const parsedStep:Step[] =  parseStepsFromResponse(res)
             setStep(parsedStep)
-
-
            if (parsedStep.length > 0) setCurrentStep(parsedStep[0].id);
        })
+
     },[])
 
        useEffect(() => {
@@ -136,7 +152,7 @@ const fetchData = async () => {
   
       const processFile = (file: FileItem, isRootFolder: boolean) => {  
         if (file.type === 'folder') {
-          // For folders, create a directory entry
+          
           mountStructure[file.name] = {
             directory: file.children ? 
               Object.fromEntries(
@@ -164,7 +180,7 @@ const fetchData = async () => {
         return mountStructure[file.name];
       };
   
-      // Process each top-level file/folder
+      
       files.forEach(file => processFile(file, true));
   
       return mountStructure;
@@ -172,9 +188,11 @@ const fetchData = async () => {
   
     const mountStructure = createMountStructure(files);
   
-    // Mount the structure if WebContainer is available
-    console.log(mountStructure);
-    webContainer?.mount(mountStructure);
+    
+    if (webContainer && isIsolated) {
+  webContainer.mount(mountStructure);
+}
+
   }, [files, webContainer]);
 
     function handleStepClick(stepId: number) {

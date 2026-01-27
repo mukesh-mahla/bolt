@@ -2,12 +2,12 @@
 import axios from "axios";
 import { ChevronsRight,  Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL 
 
 export default function HomePage() {
-  const redirect = useNavigate();
+  
   const textRef = useRef<HTMLTextAreaElement | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -26,11 +26,14 @@ export default function HomePage() {
 
       const { prompt, beautyPrompt } = response.data;
 
-      // localStorage.setItem("prompt", prompt);
-      // localStorage.setItem("beautyPrompt", beautyPrompt);
-      // localStorage.setItem("userPrompt", textvalue);
+         sessionStorage.setItem(
+          "project:init",
+          JSON.stringify({ prompt, beautyPrompt, userPrompt:textvalue })
+         );
 
-      redirect("/project",{state:{"prompt": prompt, "beautyPrompt": beautyPrompt, "userPrompt": textvalue}});
+  
+  window.location.replace("/project");
+       
     } catch (err) {
       console.error("Template error:", err);
       setLoading(false);
