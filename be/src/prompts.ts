@@ -365,6 +365,7 @@ These are NOT considered boilerplate — they are runtime requirements.
 Avoid copying tutorial-style UI layouts.
 Focus on a modern, polished interface with good spacing and accessibility.
 
+use tailwind properly make sure to add it as a dependency and include all necessary config and CSS files .
 
 dont make any mstakes
 `;
