@@ -5,32 +5,43 @@ let webContainerInstance: WebContainer | null = null;
 let bootPromise: Promise<WebContainer> | null = null;
 
 export function useWebcontainer() {
-  const [container, setContainer] = useState<WebContainer | null>(
-    webContainerInstance
-  );
+  const [container, setContainer] = useState<WebContainer | null>(null);
+  const [runtimeReady, setRuntimeReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    if (webContainerInstance) {
-      setContainer(webContainerInstance);
-      return;
-    }
+    async function boot() {
+      if (!bootPromise) {
+        bootPromise = WebContainer.boot();
+      }
 
-    if (!bootPromise) {
-      bootPromise = WebContainer.boot();
-    }
-
-    bootPromise.then((instance) => {
+      const instance = await bootPromise;
       if (cancelled) return;
+
       webContainerInstance = instance;
       setContainer(instance);
-    });
+
+      // 🔴 CRITICAL: let runtime loader unlock
+      await Promise.resolve();
+      await new Promise(r => setTimeout(r, 0));
+
+      if (!cancelled) {
+        setRuntimeReady(true);
+      }
+    }
+
+    if (webContainerInstance) {
+      setContainer(webContainerInstance);
+      setRuntimeReady(true);
+    } else {
+      boot();
+    }
 
     return () => {
       cancelled = true;
     };
   }, []);
 
-  return container;
+  return { container, runtimeReady };
 }

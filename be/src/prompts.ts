@@ -296,67 +296,113 @@ export const CONTINUE_PROMPT = stripIndents`
   Do not repeat any content, including artifact and action tags.
 `;
 
+const HTML_TEMP=`<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+`
 
 export const firstNodeprompt = `
 You are generating ORIGINAL backend code.
 
 Do NOT reproduce memorized, copyrighted, or tutorial-style templates.
-Avoid copying common Express or Node.js boilerplate verbatim.
+Avoid copying Express or Node.js boilerplate verbatim.
 
 Focus on clarity, modularity, and long-term maintainability.
-Use asynchronous patterns responsibly and handle errors consistently.
+Use async patterns responsibly and handle errors consistently.
 Only introduce dependencies when they are clearly justified.
 
-Your goal is to create backend logic that feels thoughtfully designed,
-custom-built for the problem, and safe for real-world use.
+The backend MUST be runnable and complete.
+All required entry points and configs must exist.
 `;
+
 
 export const nodePrompt = `
 You are building a custom backend service using Node.js and TypeScript.
 
-Organize the codebase by responsibility rather than by copying
-any standard or starter project layout.
+Organize the codebase by responsibility, not by copying starter templates.
 
-There should be:
+There MUST be:
 - a clear application entry point
 - a routing or API layer
-- a layer that handles business logic
-- shared utilities or helpers where appropriate
+- a business logic layer
+- shared utilities where appropriate
 
-Choose file and folder names that make sense for this project.
-Keep the code type-safe, readable, and easy to extend.
+The project MUST be runnable with npm scripts.
+Do NOT omit required runtime files.
 
-Do NOT recreate well-known Express starter templates.
+Avoid well-known Express starter layouts.
 Each backend should feel unique and purpose-built.
 `;
 
+
 export const firstReactprompt = `
-You are generating ORIGINAL frontend UI code.
+You are generating ORIGINAL frontend UI code using React and TypeScript.
 
-Do NOT reproduce common React, Vite, or Tailwind starter templates.
-Avoid copying tutorial-style layouts or boilerplate patterns.
+IMPORTANT RUNTIME CONSTRAINTS (MUST FOLLOW):
+This project MUST include the following files at the project root:
+- package.json
+- index.html
+- vite.config.ts
+- tsconfig.json
 
-Focus on creating a modern, visually polished interface
-with good spacing, hierarchy, and accessibility.
+If any of these files are missing, the project is considered INVALID.
 
-Use Tailwind CSS and Lucide React naturally and thoughtfully.
-Each interface should feel custom-designed, not auto-generated.
+These files are runtime requirements, not boilerplate.
+You may keep them minimal, but you MUST generate them.
+
+Do NOT omit required infrastructure files.
+These are NOT considered boilerplate — they are runtime requirements.
+
+Avoid copying tutorial-style UI layouts.
+Focus on a modern, polished interface with good spacing and accessibility.
+
+Only include Tailwind CSS IF you fully configure it
+(tailwind.config.ts, postcss.config, CSS entry, and usage).
+dont make any mstakes
 `;
+
 
 export const reactPrompt = `
-You are designing a custom React frontend using TypeScript and Tailwind CSS.
+You are designing a custom React frontend using TypeScript.
 
-Structure the project in a way that keeps UI, logic, and state easy to reason about.
-Organize components by responsibility or feature rather than by a fixed template.
+RUNTIME RULES (NON-NEGOTIABLE):
+This project MUST include the following files at the project root How A Basic React Project Structure Should Look Like:
+- package.json
+- index.html , follow this template ${HTML_TEMP}
+- vite.config.ts
+- tsconfig.json
 
-There should be:
-- a main entry that mounts the app
-- reusable UI building blocks
-- feature-focused views or screens
-- shared helpers or styling logic if needed
+If any of these files are missing, the project is considered INVALID.
 
-Invent file and component names that fit the project naturally.
-Avoid standard starter layouts or predictable tutorial structures.
+These files are runtime requirements, not boilerplate.
+You may keep them minimal, but you MUST generate them.
 
-The result should feel handcrafted, cohesive, and production-ready.
+STRUCTURE GUIDELINES:
+- Organize components by responsibility or feature.
+- Include reusable UI components where appropriate.
+- Create feature-focused views or screens if needed.
+
+STYLING RULES:
+- Only use Tailwind CSS if you fully configure it correctly.
+- If Tailwind is included, all required config and CSS files MUST exist.
+- Do NOT partially include Tailwind.
+
+CREATIVITY RULES:
+- Avoid copying standard starter templates verbatim.
+- Avoid tutorial-style layouts.
+- The structure can be custom, but runtime requirements must be satisfied.
+
+The final result should feel handcrafted, cohesive, and production-ready,
+while remaining fully runnable without manual intervention.
 `;
+
+
