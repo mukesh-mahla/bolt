@@ -118,7 +118,7 @@ function geminiContentsToGroqMessages(message: any[]): ChatCompletionMessagePara
   const stream = await groq.chat.completions.create({
     
     messages: [{role:"system", content: getSystemPrompt()},...groqMessages],
-    model: "llama-3.1-8b-instant",
+    model: "openai/gpt-oss-120b",
     max_completion_tokens: 2048,
     top_p: 1,
     stop: null,
