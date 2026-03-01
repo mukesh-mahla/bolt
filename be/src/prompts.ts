@@ -365,8 +365,7 @@ These are NOT considered boilerplate — they are runtime requirements.
 Avoid copying tutorial-style UI layouts.
 Focus on a modern, polished interface with good spacing and accessibility.
 
-Only include Tailwind CSS IF you fully configure it
-(tailwind.config.ts, postcss.config, CSS entry, and usage).
+
 dont make any mstakes
 `;
 
