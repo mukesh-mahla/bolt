@@ -9,14 +9,61 @@ type StreamParseResult = {
 export function parseStepsFromStream(buffer: string): StreamParseResult {
   const steps: Step[] = [];
 
-  const actionRegex =
-    /<boltAction\s+type="([^"]*)"(?:\s+filePath="([^"]*)")?>([\s\S]*?)<\/boltAction>/g;
+  // This regex waits for a COMPLETE block before matching, which is perfect for streaming.
+  const actionRegex = /<boltAction\s+type="([^"]*)"(?:\s+filePath="([^"]*)")?>([\s\S]*?)<\/boltAction>/g;
 
   let match;
   let lastConsumedIndex = 0;
 
   while ((match = actionRegex.exec(buffer)) !== null) {
-    const [, type, filePath, content] = match;
+    let [, type, filePath, content] = match;
+    content = content.trim();
+
+    // ==========================================
+    // 🛡️ SANITIZATION LAYER (Crucial for Previews)
+    // ==========================================
+
+    // 1. React 18 Deprecation Fix
+    if (filePath?.endsWith("main.tsx") || filePath?.endsWith("index.tsx")) {
+      if (content.includes("ReactDOM.render")) {
+        content = content
+          .replace(
+            /import ReactDOM from ['"]react-dom['"]/,
+            "import ReactDOM from 'react-dom/client'"
+          )
+          .replace(
+            /ReactDOM\.render\([\s\S]*?<([\w]+)\s*\/>[\s\S]*?document\.getElementById\(['"]root['"]\)\s*\)/,
+            "ReactDOM.createRoot(document.getElementById('root')!).render(<$1 />)"
+          );
+      }
+    }
+
+    // 2. TSConfig Dependency Fix
+    if (filePath?.endsWith("tsconfig.json")) {
+      content = JSON.stringify({
+        compilerOptions: { 
+          target: "ESNext", 
+          lib: ["DOM", "DOM.Iterable", "ESNext"], 
+          module: "ESNext", 
+          skipLibCheck: true, 
+          moduleResolution: "bundler", 
+          jsx: "react-jsx", 
+          strict: true, 
+          noEmit: true 
+        }
+      }, null, 2);
+    }
+
+    // 3. Tailwind CDN Fallback
+    if (filePath?.endsWith("index.html")) {
+      if (!content.includes("cdn.tailwindcss.com")) {
+        content = content.replace("<head>", `<head>\n    <script src="https://cdn.tailwindcss.com"></script>`);
+      }
+    }
+
+    // ==========================================
+    // 📦 STEP CREATION
+    // ==========================================
 
     if (type === "file") {
       steps.push({
@@ -26,7 +73,7 @@ export function parseStepsFromStream(buffer: string): StreamParseResult {
         type: StepType.CreateFile,
         status: "pending",
         path: filePath,
-        code: content.trim()
+        code: content
       });
     }
 
@@ -37,7 +84,7 @@ export function parseStepsFromStream(buffer: string): StreamParseResult {
         description: "",
         type: StepType.RunScript,
         status: "pending",
-        code: content.trim()
+        code: content
       });
     }
 
@@ -46,6 +93,7 @@ export function parseStepsFromStream(buffer: string): StreamParseResult {
 
   return {
     newSteps: steps,
+    // Safely returns any incomplete <boltAction> tags back to the main loop
     remainingBuffer: buffer.slice(lastConsumedIndex)
   };
 }
