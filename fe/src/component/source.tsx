@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import axios from "axios";
+
 import { StepType, type FileItem, type Step } from "../types/type";
 import { StepsList } from "../componets/steplist";
 import { CodeEditor } from "../componets/codeEditor";
