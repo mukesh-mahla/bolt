@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import axios from "axios";
+
 import { StepType, type FileItem, type Step } from "../types/type";
 import { StepsList } from "../componets/steplist";
 import { CodeEditor } from "../componets/codeEditor";
@@ -194,15 +194,89 @@ export default function Source() {
   async function handelclick() {
     const followValue = followRef.current?.value?.trim();
     if (!followValue || isStreaming) return;
-    const newMessages: { role: "user" | "model"; content: string }[] = [...llmMessages, { role: "user", content: followValue }];
+
+    // 1. Prepare UI for the stream
+    setIsStreaming(true);
+    const newMessages: { role: "user" | "model"; content: string }[] = [
+      ...llmMessages, 
+      { role: "user", content: followValue }
+    ];
     setLlmMessages(newMessages);
-    followRef.current!.value = "";
+    
+    if (followRef.current) followRef.current.value = "";
+
+    // Add empty placeholder for AI response to update live
+    setLlmMessages(prev => [...prev, { role: "model", content: "" }]);
+
     try {
-      const res = await axios.post(`${BACKEND_URL}/chat`, { message: newMessages });
-      setLlmMessages(prev => [...prev, { role: "model", content: res.data.AiRes }]);
-      const parsedStep = parseStepsFromStream(res.data.AiRes).newSteps;
-      setStep(prev => [...prev, ...parsedStep.map(s => ({ ...s, id: stepIdRef.current++ }))]);
-    } catch (e) { console.error(e); }
+      // 2. Start the fetch stream
+      const res = await fetch(`${BACKEND_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: newMessages })
+      });
+
+      if (!res.body) throw new Error("No response body");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      
+      let currentBuffer = "";
+      let fullAiResponse = "";
+
+      // 3. Process stream chunks
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        currentBuffer += chunk;
+        fullAiResponse += chunk;
+
+        // A. Live update the Chat Window
+        setLlmMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1].content = fullAiResponse;
+          return updated;
+        });
+
+        // B. Parse out complete <boltAction> tags
+        const { newSteps, remainingBuffer } = parseStepsFromStream(currentBuffer);
+        currentBuffer = remainingBuffer; // Keep only half-written code
+
+        if (newSteps.length > 0) {
+          // C. Update Steps UI (This automatically triggers your existing file merge useEffect)
+          setStep(prev => [
+            ...prev, 
+            ...newSteps.map(s => ({ ...s, id: stepIdRef.current++ }))
+          ]);
+
+          // D. CRITICAL: Hot-Reload the Preview!
+          // We must write the updated file directly to the running WebContainer 
+          // so the Vite dev server detects the change and updates the iframe.
+          if (container) {
+            for (const s of newSteps) {
+              if (s.type === StepType.CreateFile && s.path) {
+                try {
+                  // WebContainer expects paths without the leading slash
+                  const safePath = s.path.replace(/^\//, '');
+                  
+                  // Write the new code directly to the virtual file system
+                  await container.fs.writeFile(safePath, s.code!);
+                  console.log(`Hot-reloaded: ${safePath}`);
+                } catch (err) {
+                  console.warn(`Failed to write ${s.path} to WebContainer. If this is a new directory, it needs to be created first.`, err);
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Streaming error:", e);
+    } finally {
+      setIsStreaming(false); // Re-enable the send button
+    }
   }
 
   return (
